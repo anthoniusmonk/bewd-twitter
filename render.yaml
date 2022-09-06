@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: bewd-todolist
+    name: bewd_todolist
     env: ruby
     buildCommand: "./bin/render-build.sh"
     startCommand: "bundle exec puma -C config/puma.rb"

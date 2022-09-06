@@ -11,9 +11,7 @@ class TweetsController < ApplicationController
 
     @tweet = user.tweets.new(tweet_params)
 
-    if @tweet.save
-      render 'tweets/create'
-    end
+    render 'tweets/create' if @tweet.save
   end
 
   def destroy
@@ -25,7 +23,7 @@ class TweetsController < ApplicationController
     user = session.user
     tweet = Tweet.find_by(id: params[:id])
 
-    if tweet and tweet.user == user and tweet.destroy
+    if tweet && (tweet.user == user) && tweet.destroy
       render json: {
         success: true
       }
@@ -47,7 +45,7 @@ class TweetsController < ApplicationController
 
   private
 
-    def tweet_params
-      params.require(:tweet).permit(:message)
-    end
+  def tweet_params
+    params.require(:tweet).permit(:message)
+  end
 end
