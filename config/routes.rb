@@ -3,7 +3,8 @@ Rails.application.routes.draw do
   get '/feeds' => 'feeds#index'
 
   # USERS
-
+  post '/users' => 'users#create'
+  
   # SESSIONS
 
   # TWEETS
