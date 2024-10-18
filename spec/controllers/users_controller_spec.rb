@@ -5,14 +5,8 @@ RSpec.describe UsersController, type: :controller do
 
   describe 'POST /users' do
     it 'renders new user object' do
-      post :create, params: {
-        user: {
-          email: 'test@test.com',
-          password: 'asdasdasd',
-          username: 'test'
-        }
-      }
-
+      post :create, params: { user: { username: 'test', email: 'test@test.com', password: 'password' } }
+    
       expect(response.body).to eq({
         user: {
           username: 'test',

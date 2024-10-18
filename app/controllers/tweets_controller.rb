@@ -1,6 +1,6 @@
 class TweetsController < ApplicationController
   skip_before_action :verify_authenticity_token, only: [:create]
-  before_action :require_user
+  before_action :require_user, only: [:create, :destroy]
 
   def create
     tweet = @current_user.tweets.build(tweet_params)
@@ -13,8 +13,8 @@ class TweetsController < ApplicationController
   end
 
   def destroy
-    tweet = current_user.tweets.find_by(id: params[:id])
-
+    tweet = @current_user.tweets.find_by(id: params[:id])
+  
     if tweet
       tweet.destroy
       render json: { message: 'Tweet deleted successfully' }, status: :ok
@@ -32,7 +32,7 @@ class TweetsController < ApplicationController
     user = User.find_by(username: params[:username])
 
     if user
-      render json: user.tweets, status: :ok
+      render json: user.tweets.as_json(only: [:id, :message], include: { user: { only: :username } }), status: :ok
     else
       render json: { error: 'User not found' }, status: :not_found
     end
@@ -45,7 +45,7 @@ class TweetsController < ApplicationController
   end
 
   def require_user
-    @current_user = Session.find_by(token: cookies[:twitter_session_token])&.user
+    @current_user = Session.find_by(token: cookies.signed[:twitter_session_token])&.user
     render json: { error: 'Unauthorized' }, status: :unauthorized unless @current_user
   end
 end

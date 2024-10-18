@@ -1,23 +1,32 @@
 class SessionsController < ApplicationController
-  skip_before_action :verify_authenticity_token, only: [:create]
-  skip_before_action :verify_authenticity_token, only: [:destroy]
+  skip_before_action :verify_authenticity_token, only: [:create, :destroy]
+
   def create
     user = User.find_by(username: params[:user][:username])
-
+  
     if user&.authenticate(params[:user][:password])
+      user.sessions.destroy_all
       session = user.sessions.create
-      cookies.permanent[:twitter_session_token] = session.token
-      render json: { message: 'Session created successfully' }, status: :created
+  
+      if session.persisted?
+        Rails.logger.debug "Session created: #{session.inspect}"
+        cookies.permanent[:twitter_session_token] = session.token
+        render json: { success: true }, status: :created
+      else
+        render json: { error: 'Session creation failed' }, status: :unprocessable_entity
+      end
     else
       render json: { error: 'Invalid username or password' }, status: :unauthorized
     end
   end
 
   def authenticated
-    session = Session.find_by(token: cookies[:twitter_session_token])
-
+    token = cookies[:twitter_session_token]
+    Rails.logger.debug "Session token retrieved: #{token}"
+    session = Session.find_by(token: token)
+  
     if session
-      render json: { authenticated: true }, status: :ok
+      render json: { authenticated: true, username: session.user.username }, status: :ok
     else
       render json: { authenticated: false }, status: :unauthorized
     end
